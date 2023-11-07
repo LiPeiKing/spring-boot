@@ -53,6 +53,7 @@ class ConfigDataLocationResolvers {
 	 */
 	ConfigDataLocationResolvers(DeferredLogFactory logFactory, ConfigurableBootstrapContext bootstrapContext,
 			Binder binder, ResourceLoader resourceLoader) {
+		// 调用重载构造方法，从spring.factory中获取ConfigDataLocationResolver类型的所有实现。StandardConfigDataLocationResolver，ConfigTreeConfigDataLocationResolver
 		this(logFactory, bootstrapContext, binder, resourceLoader, SpringFactoriesLoader
 				.loadFactoryNames(ConfigDataLocationResolver.class, resourceLoader.getClassLoader()));
 	}
@@ -77,6 +78,7 @@ class ConfigDataLocationResolvers {
 					availableParameters.add(BootstrapContext.class, bootstrapContext);
 					availableParameters.add(BootstrapRegistry.class, bootstrapContext);
 				});
+		// ConfigDataLocationResolver进行一次转换，然后返回一个不可变集合
 		this.resolvers = reorder(instantiator.instantiate(resourceLoader.getClassLoader(), names));
 	}
 
@@ -102,8 +104,10 @@ class ConfigDataLocationResolvers {
 		if (location == null) {
 			return Collections.emptyList();
 		}
+		// 遍历解析器，寻找一个能够解析当前路径的解析器，一般我们获取的都是StandardConfigDataLocationResolver解析器
 		for (ConfigDataLocationResolver<?> resolver : getResolvers()) {
 			if (resolver.isResolvable(context, location)) {
+				// 继续调用解析器集合对象中的重载方法，这一次传入了一个解析器
 				return resolve(resolver, context, location, profiles);
 			}
 		}
@@ -112,10 +116,12 @@ class ConfigDataLocationResolvers {
 
 	private List<ConfigDataResolutionResult> resolve(ConfigDataLocationResolver<?> resolver,
 			ConfigDataLocationResolverContext context, ConfigDataLocation location, Profiles profiles) {
+		// 解析不带profile的配置文件，也就是application为名称的主配置文件，我们一会debug这个方法
 		List<ConfigDataResolutionResult> resolved = resolve(location, false, () -> resolver.resolve(context, location));
 		if (profiles == null) {
 			return resolved;
 		}
+		// 解析带有profile的配置文件，类似于 applicaiton-{profile}.[extend]，解析流和上面一模一样
 		List<ConfigDataResolutionResult> profileSpecific = resolve(location, true,
 				() -> resolver.resolveProfileSpecific(context, location, profiles));
 		return merge(resolved, profileSpecific);
@@ -123,9 +129,15 @@ class ConfigDataLocationResolvers {
 
 	private List<ConfigDataResolutionResult> resolve(ConfigDataLocation location, boolean profileSpecific,
 			Supplier<List<? extends ConfigDataResource>> resolveAction) {
+		// 调用上面传入的一个lambda表达式，看看结果是否为空，为空，创建一个空的返回结果，我们接下来debug这个lambda表达式
+		// lambda表达式中再次调用重载，分类两步
+		// 1、一步将路径ConfigDataLocation解析为标准配置数据引用 StandardConfigDataReference
+		// 2、一步将标准配置数据引用对象StandardConfigDataReference解析为标准数据资源对象StandardConfigDataResource
 		List<ConfigDataResource> resources = nonNullList(resolveAction.get());
+		// 收集结果
 		List<ConfigDataResolutionResult> resolved = new ArrayList<>(resources.size());
 		for (ConfigDataResource resource : resources) {
+			// 将解析结果转换为ConfigDataResolutionResult，包含了路径信息，资源信息，以及是否为带有profile的配置
 			resolved.add(new ConfigDataResolutionResult(location, resource, profileSpecific));
 		}
 		return resolved;

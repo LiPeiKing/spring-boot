@@ -59,8 +59,10 @@ import org.springframework.util.ClassUtils;
 public class AnnotationConfigServletWebServerApplicationContext extends ServletWebServerApplicationContext
 		implements AnnotationConfigRegistry {
 
+	// 用来处理 BeanDefinition 的注册
 	private final AnnotatedBeanDefinitionReader reader;
 
+	// 用来处理包的扫描
 	private final ClassPathBeanDefinitionScanner scanner;
 
 	private final Set<Class<?>> annotatedClasses = new LinkedHashSet<>();

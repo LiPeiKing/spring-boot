@@ -91,7 +91,11 @@ public final class ConfigurationPropertySources {
 			attached = new ConfigurationPropertySourcesPropertySource(ATTACHED_PROPERTY_SOURCE_NAME,
 					new SpringConfigurationPropertySources(sources));
 		}
+		// 从属性源集合中获取名字为configurationProperties的属性源，如果有则删除掉
 		sources.remove(ATTACHED_PROPERTY_SOURCE_NAME);
+
+		// 因为前面的操作，到该步骤，属性源肯定为null，然后创建一个名字为configurationProperties，的ConfigurationPropertySourcesPropertySource类型属性源
+		// 并且将属性源集合加入该属性源
 		sources.addFirst(attached);
 	}
 

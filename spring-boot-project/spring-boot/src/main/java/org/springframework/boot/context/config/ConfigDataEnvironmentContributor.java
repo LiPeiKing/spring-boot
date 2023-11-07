@@ -236,12 +236,15 @@ class ConfigDataEnvironmentContributor implements Iterable<ConfigDataEnvironment
 		Iterable<ConfigurationPropertySource> sources = Collections.singleton(getConfigurationPropertySource());
 		PlaceholdersResolver placeholdersResolver = new ConfigDataEnvironmentContributorPlaceholdersResolver(
 				contributors, activationContext, this, true);
+		// 配置文件中占位符的替换
 		Binder binder = new Binder(sources, placeholdersResolver, null, null, null);
 		UseLegacyConfigProcessingException.throwIfRequested(binder);
 		ConfigDataProperties properties = ConfigDataProperties.get(binder);
+		// 配置文件中的spring.config.import之类的配置解析
 		if (properties != null && this.configDataOptions.contains(ConfigData.Option.IGNORE_IMPORTS)) {
 			properties = properties.withoutImports();
 		}
+		// 将解析后的贡献者替换原有贡献者
 		return new ConfigDataEnvironmentContributor(Kind.BOUND_IMPORT, this.location, this.resource,
 				this.fromProfileSpecificImport, this.propertySource, this.configurationPropertySource, properties,
 				this.configDataOptions, null);
@@ -373,8 +376,10 @@ class ConfigDataEnvironmentContributor implements Iterable<ConfigDataEnvironment
 	 * @return a new {@link ConfigDataEnvironmentContributor} instance
 	 */
 	static ConfigDataEnvironmentContributor of(List<ConfigDataEnvironmentContributor> contributors) {
+		// 以ImportPhase.BEFORE_PROFILE_ACTIVATION为key，将之前获取到的，已存在贡献者，初始导入贡献者 的集合作为value，
 		Map<ImportPhase, List<ConfigDataEnvironmentContributor>> children = new LinkedHashMap<>();
 		children.put(ImportPhase.BEFORE_PROFILE_ACTIVATION, Collections.unmodifiableList(contributors));
+		// 创建一个根贡献者，根贡献者初始化只有自己的角色，以及children属性
 		return new ConfigDataEnvironmentContributor(Kind.ROOT, null, null, false, null, null, null, null, children);
 	}
 

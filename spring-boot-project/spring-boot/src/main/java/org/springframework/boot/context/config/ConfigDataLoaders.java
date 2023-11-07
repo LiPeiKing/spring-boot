@@ -55,6 +55,7 @@ class ConfigDataLoaders {
 	 */
 	ConfigDataLoaders(DeferredLogFactory logFactory, ConfigurableBootstrapContext bootstrapContext,
 			ClassLoader classLoader) {
+		// 调用重载构造方法，从spring.factory中获取ConfigDataLoader类型的所有实现.ConfigTreeConfigDataLoader, StandardConfigDataLoader
 		this(logFactory, bootstrapContext, classLoader,
 				SpringFactoriesLoader.loadFactoryNames(ConfigDataLoader.class, classLoader));
 	}
@@ -77,7 +78,9 @@ class ConfigDataLoaders {
 					availableParameters.add(BootstrapContext.class, bootstrapContext);
 					availableParameters.add(BootstrapRegistry.class, bootstrapContext);
 				});
+		// 将names中的类进行实例化
 		this.loaders = instantiator.instantiate(classLoader, names);
+		// 在根据loader获取对应的资源类型
 		this.resourceTypes = getResourceTypes(this.loaders);
 	}
 
@@ -102,8 +105,10 @@ class ConfigDataLoaders {
 	 * @throws IOException on IO error
 	 */
 	<R extends ConfigDataResource> ConfigData load(ConfigDataLoaderContext context, R resource) throws IOException {
+		// 获取一个合适 加载器，一般都是StandardConfigDataLoader
 		ConfigDataLoader<R> loader = getLoader(context, resource);
 		this.logger.trace(LogMessage.of(() -> "Loading " + resource + " using loader " + loader.getClass().getName()));
+		// 然后我们用StandardConfigDataLoader加载器加载资源
 		return loader.load(context, resource);
 	}
 

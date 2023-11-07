@@ -135,6 +135,7 @@ class BeanDefinitionLoader {
 	 * Load the sources into the reader.
 	 */
 	void load() {
+		// 这里的 sources 中就只有一个元素：xxxApplication.class，主启动类
 		for (Object source : this.sources) {
 			load(source);
 		}
@@ -142,7 +143,9 @@ class BeanDefinitionLoader {
 
 	private void load(Object source) {
 		Assert.notNull(source, "Source must not be null");
+		// Class 类型在这里加载
 		if (source instanceof Class<?>) {
+			// source 为 Demo01Application.class，我们主要关注这个方法
 			load((Class<?>) source);
 			return;
 		}
@@ -161,7 +164,9 @@ class BeanDefinitionLoader {
 		throw new IllegalArgumentException("Invalid source type " + source.getClass());
 	}
 
+	// Class 类型的加载操作
 	private void load(Class<?> source) {
+		// 处理 grouovy 语言的，不用管
 		if (isGroovyPresent() && GroovyBeanDefinitionSource.class.isAssignableFrom(source)) {
 			// Any GroovyLoaders added in beans{} DSL can contribute beans here
 			GroovyBeanDefinitionSource loader = BeanUtils.instantiateClass(source, GroovyBeanDefinitionSource.class);

@@ -42,17 +42,24 @@ public class StandardConfigDataLoader implements ConfigDataLoader<StandardConfig
 	@Override
 	public ConfigData load(ConfigDataLoaderContext context, StandardConfigDataResource resource)
 			throws IOException, ConfigDataNotFoundException {
+		// 如果资源是一个空的目录，则返回一个空的配置数据
 		if (resource.isEmptyDirectory()) {
 			return ConfigData.EMPTY;
 		}
+		// 资源不存在则报错
 		ConfigDataResourceNotFoundException.throwIfDoesNotExist(resource, resource.getResource());
+		// 获取资源中的 标准配置数据引用
 		StandardConfigDataReference reference = resource.getReference();
+		// 将资源转为OriginTrackedWritableResource类型
 		Resource originTrackedResource = OriginTrackedResource.of(resource.getResource(),
 				Origin.from(reference.getConfigDataLocation()));
+		// 格式化资源的名字
 		String name = String.format("Config resource '%s' via location '%s'", resource,
 				reference.getConfigDataLocation());
+		// 通过标准配置数据引用里面的 属性源解析器 来加载资源，返回的结果就是 PropertySource
 		List<PropertySource<?>> propertySources = reference.getPropertySourceLoader().load(name, originTrackedResource);
 		PropertySourceOptions options = (resource.getProfile() != null) ? PROFILE_SPECIFIC : NON_PROFILE_SPECIFIC;
+		// 然后创建一个配置数据对象，传入属性源
 		return new ConfigData(propertySources, options);
 	}
 

@@ -81,8 +81,11 @@ class ConfigDataImporter {
 			ConfigDataLocationResolverContext locationResolverContext, ConfigDataLoaderContext loaderContext,
 			List<ConfigDataLocation> locations) {
 		try {
+			// 获取profiles，第一阶段为空，在第三阶段时如果配置了，则有值
 			Profiles profiles = (activationContext != null) ? activationContext.getProfiles() : null;
+			// 解析的第一大步
 			List<ConfigDataResolutionResult> resolved = resolve(locationResolverContext, profiles, locations);
+			// 解析的第二大步
 			return load(loaderContext, resolved);
 		}
 		catch (IOException ex) {
@@ -92,8 +95,11 @@ class ConfigDataImporter {
 
 	private List<ConfigDataResolutionResult> resolve(ConfigDataLocationResolverContext locationResolverContext,
 			Profiles profiles, List<ConfigDataLocation> locations) {
+		// 收集配置数据路径解析返回
 		List<ConfigDataResolutionResult> resolved = new ArrayList<>(locations.size());
+		// 遍历要解析的配置文件路径
 		for (ConfigDataLocation location : locations) {
+			// 调用重载的解析方法
 			resolved.addAll(resolve(locationResolverContext, profiles, location));
 		}
 		return Collections.unmodifiableList(resolved);
@@ -102,6 +108,7 @@ class ConfigDataImporter {
 	private List<ConfigDataResolutionResult> resolve(ConfigDataLocationResolverContext locationResolverContext,
 			Profiles profiles, ConfigDataLocation location) {
 		try {
+			//ConfigDataImporter中的解析器集合对象
 			return this.resolvers.resolve(locationResolverContext, location, profiles);
 		}
 		catch (ConfigDataNotFoundException ex) {
@@ -113,22 +120,31 @@ class ConfigDataImporter {
 	private Map<ConfigDataResolutionResult, ConfigData> load(ConfigDataLoaderContext loaderContext,
 			List<ConfigDataResolutionResult> candidates) throws IOException {
 		Map<ConfigDataResolutionResult, ConfigData> result = new LinkedHashMap<>();
+		// 遍历配置数据结果
 		for (int i = candidates.size() - 1; i >= 0; i--) {
+			// 获取配置数据结果
 			ConfigDataResolutionResult candidate = candidates.get(i);
+			// 获取配置数据位置
 			ConfigDataLocation location = candidate.getLocation();
+			// 获取配置数据资源
 			ConfigDataResource resource = candidate.getResource();
+			// 检查这个资源是否可选加入缓存
 			if (resource.isOptional()) {
 				this.optionalLocations.add(location);
 			}
+			// 检查这个资源是否已经加载过，加入已经加载过的路径
 			if (this.loaded.contains(resource)) {
 				this.loadedLocations.add(location);
 			}
 			else {
 				try {
+					// 调用加载器集合对象对资源进行加载，返回的ConfigData对象中有PropertiesSource对象，也是本方法的核心，我们要debug的位置
 					ConfigData loaded = this.loaders.load(loaderContext, resource);
 					if (loaded != null) {
+						// 加载的结果不为null,则存入已加载资源缓存，已加载路径缓存
 						this.loaded.add(resource);
 						this.loadedLocations.add(location);
+						// 存入返回的记过，key为配置数据结果，value为加载结果
 						result.put(candidate, loaded);
 					}
 				}

@@ -83,6 +83,7 @@ public class EnvironmentPostProcessorApplicationListener implements SmartApplica
 
 	@Override
 	public void onApplicationEvent(ApplicationEvent event) {
+		// SpringApplication-> prepareEnvironment() -> listeners.environmentPrepared 发送的就是ApplicationEnvironmentPreparedEvent事件，进入这里
 		if (event instanceof ApplicationEnvironmentPreparedEvent) {
 			onApplicationEnvironmentPreparedEvent((ApplicationEnvironmentPreparedEvent) event);
 		}
@@ -97,6 +98,16 @@ public class EnvironmentPostProcessorApplicationListener implements SmartApplica
 	private void onApplicationEnvironmentPreparedEvent(ApplicationEnvironmentPreparedEvent event) {
 		ConfigurableEnvironment environment = event.getEnvironment();
 		SpringApplication application = event.getSpringApplication();
+		// 获取环境后置处理器，遍历执行，其实我们真正关注的，是对配置文件进行解析的那个，也就是ConfigDataEnvironmentPostProcessor
+		// 1、org.springframework.boot.env.RandomValuePropertySourceEnvironmentPostProcessor
+		// 2、org.springframework.boot.env.SystemEnvironmentPropertySourceEnvironmentPostProcessor
+		// 3、org.springframework.boot.env.SpringApplicationJsonEnvironmentPostProcessor
+		// 4、org.springframework.boot.cloud.CloudFoundryVcapEnvironmentPostProcessor
+		// 5、org.springframework.boot.context.config.ConfigDataEnvironmentPostProcessor
+		// 6、org.springframework.boot.devtools.env.DevToolsHomePropertiesPostProcessor
+		// 7、org.springframework.boot.devtools.env.DevToolsPropertyDefaultsPostProcessor
+		// 8、org.springframework.boot.reactor.DebugAgentEnvironmentPostProcessor
+		// 我们只需关系ConfigDataEnvironmentPostProcessor
 		for (EnvironmentPostProcessor postProcessor : getEnvironmentPostProcessors(application.getResourceLoader(),
 				event.getBootstrapContext())) {
 			postProcessor.postProcessEnvironment(environment, application);

@@ -79,7 +79,9 @@ import org.springframework.core.io.support.SpringFactoriesLoader;
 @Retention(RetentionPolicy.RUNTIME)
 @Documented
 @Inherited
+// 自动装配的包
 @AutoConfigurationPackage
+// 引入的自动装配类
 @Import(AutoConfigurationImportSelector.class)
 public @interface EnableAutoConfiguration {
 
@@ -90,16 +92,12 @@ public @interface EnableAutoConfiguration {
 	String ENABLED_OVERRIDE_PROPERTY = "spring.boot.enableautoconfiguration";
 
 	/**
-	 * Exclude specific auto-configuration classes such that they will never be applied.
-	 * @return the classes to exclude
+	 * 可自行定义排除自动装配的类
 	 */
 	Class<?>[] exclude() default {};
 
 	/**
-	 * Exclude specific auto-configuration class names such that they will never be
-	 * applied.
-	 * @return the class names to exclude
-	 * @since 1.3.0
+	 * 可自行定义排除自动装配的类名
 	 */
 	String[] excludeName() default {};
 

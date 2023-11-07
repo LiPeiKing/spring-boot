@@ -39,59 +39,41 @@ import org.springframework.core.io.support.SpringFactoriesLoader;
 public interface SpringApplicationRunListener {
 
 	/**
-	 * Called immediately when the run method has first started. Can be used for very
-	 * early initialization.
-	 * @param bootstrapContext the bootstrap context
+	 * 首次启动run方法时立即调用。可用于非常早期的初始化。
 	 */
 	default void starting(ConfigurableBootstrapContext bootstrapContext) {
 	}
 
 	/**
-	 * Called once the environment has been prepared, but before the
-	 * {@link ApplicationContext} has been created.
-	 * @param bootstrapContext the bootstrap context
-	 * @param environment the environment
+	 * 准备好环境（Environment构建完成），但在创建ApplicationContext之前调用。
 	 */
 	default void environmentPrepared(ConfigurableBootstrapContext bootstrapContext,
 			ConfigurableEnvironment environment) {
 	}
 
 	/**
-	 * Called once the {@link ApplicationContext} has been created and prepared, but
-	 * before sources have been loaded.
-	 * @param context the application context
+	 * 在创建和构建ApplicationContext之后，但在加载之前调用。
 	 */
 	default void contextPrepared(ConfigurableApplicationContext context) {
 	}
 
 	/**
-	 * Called once the application context has been loaded but before it has been
-	 * refreshed.
-	 * @param context the application context
+	 * ApplicationContext已加载但在刷新之前调用。
 	 */
 	default void contextLoaded(ConfigurableApplicationContext context) {
 	}
 
 	/**
-	 * The context has been refreshed and the application has started but
-	 * {@link CommandLineRunner CommandLineRunners} and {@link ApplicationRunner
-	 * ApplicationRunners} have not been called.
-	 * @param context the application context.
-	 * @param timeTaken the time taken to start the application or {@code null} if unknown
-	 * @since 2.6.0
+	 * ApplicationContext已刷新，应用程序已启动，
+	 * 但尚未调用CommandLineRunners和ApplicationRunners。
 	 */
 	default void started(ConfigurableApplicationContext context, Duration timeTaken) {
 		started(context);
 	}
 
 	/**
-	 * The context has been refreshed and the application has started but
-	 * {@link CommandLineRunner CommandLineRunners} and {@link ApplicationRunner
-	 * ApplicationRunners} have not been called.
-	 * @param context the application context.
-	 * @since 2.0.0
-	 * @deprecated since 2.6.0 for removal in 3.0.0 in favor of
-	 * {@link #started(ConfigurableApplicationContext, Duration)}
+	 * 在运行方法彻底完成之前立即调用，
+	 * 刷新ApplicationContext并调用所有CommandLineRunners和ApplicationRunner。
 	 */
 	@Deprecated
 	default void started(ConfigurableApplicationContext context) {
@@ -124,11 +106,7 @@ public interface SpringApplicationRunListener {
 	}
 
 	/**
-	 * Called when a failure occurs when running the application.
-	 * @param context the application context or {@code null} if a failure occurred before
-	 * the context was created
-	 * @param exception the failure
-	 * @since 2.0.0
+	 * 在运行应用程序时失败时调用。
 	 */
 	default void failed(ConfigurableApplicationContext context, Throwable exception) {
 	}
